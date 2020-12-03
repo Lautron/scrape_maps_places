@@ -19,11 +19,15 @@ def write_csv(res_list):
         for dicty in res_list:
             writer.writerow([dicty['name'], dicty['direction'], dicty['phone'], dicty['name'] if random.choice([True, False]) else '', dicty['website'], dicty['latitude'], dicty['longitude'], dicty['ptype']])
 #Parse page
-def parse_page(ptype):
+def parse_page(ptype, limit=999):
     items = driver.find_elements_by_class_name("VkpGBb")
     res_list = []
+    count = 0
     for item in items:
         item.click()
+        if count >= limit:
+            break
+        count += 1
         time.sleep(1)
         element = WebDriverWait(driver, 60).until( 
             EC.presence_of_element_located((By.CLASS_NAME, "ifM9O")) 
@@ -71,26 +75,25 @@ def parse_html(html):
         'website': website if website != '#' else '',
     }
 
-def scrape_attractions(urls):
+def scrape_attractions(urls, ptype):
     driver.get(url)
-    ptype = ''
-    for category in ['alojamiento', 'atraccion', 'restaurante']:
-        if category in url:
-            ptype = category
-            break
+    # for category in ['alojamiento', 'atraccion', 'restaurante']:
+    #     if category in url:
+    #         ptype = category
+    #         break
 
     if not ptype:
         print('Invalid category')
         return
     time.sleep(5)
-    data = parse_page(ptype)
+    data = parse_page(ptype, limit=6)
     write_csv(data)
 
 
 if __name__ == "__main__":
-    urls = []
+    urls = ['']
     for url in urls:
-        scrape_attractions(url)
+        scrape_attractions(url, 'gastronomia')
 
     driver.close()
 
